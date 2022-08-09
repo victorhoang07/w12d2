@@ -291,6 +291,8 @@ var _signup_container = __webpack_require__(/*! ./session/signup_container */ ".
 
 var _signup_container2 = _interopRequireDefault(_signup_container);
 
+var _route_utils = __webpack_require__(/*! ../utils/route_utils */ "./frontend/utils/route_utils.jsx");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = function () {
@@ -299,8 +301,8 @@ exports.default = function () {
     null,
     _react2.default.createElement(_reactRouterDom.Route, { path: '/', component: _nav_bar_container2.default }),
     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _home2.default }),
-    _react2.default.createElement(_reactRouterDom.Route, { path: '/chirps', component: _chirp_index_container2.default }),
-    _react2.default.createElement(_reactRouterDom.Route, { path: '/signup', component: _signup_container2.default })
+    _react2.default.createElement(_route_utils.ProtectedRoute, { path: '/chirps', component: _chirp_index_container2.default }),
+    _react2.default.createElement(_route_utils.AuthRoute, { path: '/signup', component: _signup_container2.default })
   );
 };
 
@@ -566,7 +568,21 @@ exports.default = function (_ref) {
   var currentUser = _ref.currentUser,
       logout = _ref.logout;
 
-  var display = _react2.default.createElement(
+  var display = currentUser ? _react2.default.createElement(
+    'div',
+    null,
+    _react2.default.createElement(
+      'p',
+      null,
+      'Hello, ',
+      currentUser.username
+    ),
+    _react2.default.createElement(
+      'button',
+      { onClick: logout },
+      'Logout'
+    )
+  ) : _react2.default.createElement(
     'div',
     null,
     _react2.default.createElement(
@@ -623,24 +639,29 @@ var _nav_bar = __webpack_require__(/*! ./nav_bar */ "./frontend/components/nav_b
 
 var _nav_bar2 = _interopRequireDefault(_nav_bar);
 
+var _session = __webpack_require__(/*! ../../actions/session */ "./frontend/actions/session.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var mapStateToProps = function mapStateToProps(state) {
+  return {
+    currentUser: state.session.currentUser
+  };
+};
 
 // Comment this back in after you have built the login functionality
 
-// import { logout } from '../../actions/session';
-
-// const mapStateToProps = state => ({
-//   currentUser: state.session.currentUser,
-// });
-
-// const mapDispatchToProps = dispatch => ({
-//   logout: () => dispatch(logout()),
-// });
-
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    logout: function logout() {
+      return dispatch((0, _session.logout)());
+    }
+  };
+};
 
 // Comment this out when you have built the login functionality
-var mapStateToProps = null;
-var mapDispatchToProps = null;
+// const mapStateToProps = null;
+// const mapDispatchToProps = null;
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_nav_bar2.default);
 
@@ -1167,6 +1188,64 @@ var deleteLikeFromChirp = exports.deleteLikeFromChirp = function deleteLikeFromC
     data: { id: id }
   });
 };
+
+/***/ }),
+
+/***/ "./frontend/utils/route_utils.jsx":
+/*!****************************************!*\
+  !*** ./frontend/utils/route_utils.jsx ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.ProtectedRoute = exports.AuthRoute = undefined;
+
+var _react = __webpack_require__(/*! react */ "./node_modules/react/react.js");
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+
+var _reactRouterDom = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/es/index.js");
+
+var _ConstPlugin = __webpack_require__(/*! webpack/lib/ConstPlugin */ "./node_modules/webpack/lib/ConstPlugin.js");
+
+var _ConstPlugin2 = _interopRequireDefault(_ConstPlugin);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var mapStateToProps = function mapStateToProps(state) {
+    return {
+        loggedIn: Boolean(state.session.currentUser)
+    };
+};
+
+var Auth = function Auth(_ref) {
+    var loggedIn = _ref.loggedIn,
+        path = _ref.path,
+        Component = _ref.component;
+    return _react2.default.createElement(_reactRouterDom.Route, { path: path, render: function render(props) {
+            return loggedIn ? _react2.default.createElement(_reactRouterDom.Redirect, { to: '/' }) : _react2.default.createElement(Component, props);
+        } });
+};
+
+var Protected = function Protected(_ref2) {
+    var loggedIn = _ref2.loggedIn,
+        path = _ref2.path,
+        Component = _ref2.component;
+    return _react2.default.createElement(_reactRouterDom.Route, { path: path, render: function render(props) {
+            return loggedIn ? _react2.default.createElement(Component, props) : _react2.default.createElement(_reactRouterDom.Redirect, { to: '/signup' });
+        } });
+};
+
+var AuthRoute = exports.AuthRoute = (0, _reactRouterDom.withRouter)((0, _reactRedux.connect)(mapStateToProps)(Auth));
+var ProtectedRoute = exports.ProtectedRoute = (0, _reactRouterDom.withRouter)((0, _reactRedux.connect)(mapStateToProps)(Protected));
 
 /***/ }),
 
@@ -5214,6 +5293,320 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
+
+/***/ }),
+
+/***/ "./node_modules/path-browserify/index.js":
+/*!***********************************************!*\
+  !*** ./node_modules/path-browserify/index.js ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(process) {// .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
+// backported and transplited with Babel, with backwards-compat fixes
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  if (path.length === 0) return '.';
+  var code = path.charCodeAt(0);
+  var hasRoot = code === 47 /*/*/;
+  var end = -1;
+  var matchedSlash = true;
+  for (var i = path.length - 1; i >= 1; --i) {
+    code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        if (!matchedSlash) {
+          end = i;
+          break;
+        }
+      } else {
+      // We saw the first non-path separator
+      matchedSlash = false;
+    }
+  }
+
+  if (end === -1) return hasRoot ? '/' : '.';
+  if (hasRoot && end === 1) {
+    // return '//';
+    // Backwards-compat fix:
+    return '/';
+  }
+  return path.slice(0, end);
+};
+
+function basename(path) {
+  if (typeof path !== 'string') path = path + '';
+
+  var start = 0;
+  var end = -1;
+  var matchedSlash = true;
+  var i;
+
+  for (i = path.length - 1; i >= 0; --i) {
+    if (path.charCodeAt(i) === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          start = i + 1;
+          break;
+        }
+      } else if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // path component
+      matchedSlash = false;
+      end = i + 1;
+    }
+  }
+
+  if (end === -1) return '';
+  return path.slice(start, end);
+}
+
+// Uses a mixed approach for backwards-compatibility, as ext behavior changed
+// in new Node.js versions, so only basename() above is backported here
+exports.basename = function (path, ext) {
+  var f = basename(path);
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+exports.extname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  var startDot = -1;
+  var startPart = 0;
+  var end = -1;
+  var matchedSlash = true;
+  // Track the state of characters (if any) we see before our first dot and
+  // after any path separator we find
+  var preDotState = 0;
+  for (var i = path.length - 1; i >= 0; --i) {
+    var code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+    if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // extension
+      matchedSlash = false;
+      end = i + 1;
+    }
+    if (code === 46 /*.*/) {
+        // If this is our first dot, mark it as the start of our extension
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+    } else if (startDot !== -1) {
+      // We saw a non-dot and non-path separator before our dot, so we should
+      // have a good chance at having a non-empty extension
+      preDotState = -1;
+    }
+  }
+
+  if (startDot === -1 || end === -1 ||
+      // We saw a non-dot character immediately before the dot
+      preDotState === 0 ||
+      // The (right-most) trimmed path component is exactly '..'
+      preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
+    return '';
+  }
+  return path.slice(startDot, end);
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -30373,6 +30766,771 @@ function warning(condition, message) {
 
 /***/ }),
 
+/***/ "./node_modules/util/node_modules/inherits/inherits_browser.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/util/node_modules/inherits/inherits_browser.js ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/util/support/isBufferBrowser.js":
+/*!******************************************************!*\
+  !*** ./node_modules/util/support/isBufferBrowser.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = function isBuffer(arg) {
+  return arg && typeof arg === 'object'
+    && typeof arg.copy === 'function'
+    && typeof arg.fill === 'function'
+    && typeof arg.readUInt8 === 'function';
+}
+
+/***/ }),
+
+/***/ "./node_modules/util/util.js":
+/*!***********************************!*\
+  !*** ./node_modules/util/util.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
+  function getOwnPropertyDescriptors(obj) {
+    var keys = Object.keys(obj);
+    var descriptors = {};
+    for (var i = 0; i < keys.length; i++) {
+      descriptors[keys[i]] = Object.getOwnPropertyDescriptor(obj, keys[i]);
+    }
+    return descriptors;
+  };
+
+var formatRegExp = /%[sdj%]/g;
+exports.format = function(f) {
+  if (!isString(f)) {
+    var objects = [];
+    for (var i = 0; i < arguments.length; i++) {
+      objects.push(inspect(arguments[i]));
+    }
+    return objects.join(' ');
+  }
+
+  var i = 1;
+  var args = arguments;
+  var len = args.length;
+  var str = String(f).replace(formatRegExp, function(x) {
+    if (x === '%%') return '%';
+    if (i >= len) return x;
+    switch (x) {
+      case '%s': return String(args[i++]);
+      case '%d': return Number(args[i++]);
+      case '%j':
+        try {
+          return JSON.stringify(args[i++]);
+        } catch (_) {
+          return '[Circular]';
+        }
+      default:
+        return x;
+    }
+  });
+  for (var x = args[i]; i < len; x = args[++i]) {
+    if (isNull(x) || !isObject(x)) {
+      str += ' ' + x;
+    } else {
+      str += ' ' + inspect(x);
+    }
+  }
+  return str;
+};
+
+
+// Mark that a method should not be used.
+// Returns a modified function which warns once by default.
+// If --no-deprecation is set, then it is a no-op.
+exports.deprecate = function(fn, msg) {
+  if (typeof process !== 'undefined' && process.noDeprecation === true) {
+    return fn;
+  }
+
+  // Allow for deprecating things in the process of starting up.
+  if (typeof process === 'undefined') {
+    return function() {
+      return exports.deprecate(fn, msg).apply(this, arguments);
+    };
+  }
+
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (process.throwDeprecation) {
+        throw new Error(msg);
+      } else if (process.traceDeprecation) {
+        console.trace(msg);
+      } else {
+        console.error(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
+
+  return deprecated;
+};
+
+
+var debugs = {};
+var debugEnviron;
+exports.debuglog = function(set) {
+  if (isUndefined(debugEnviron))
+    debugEnviron = process.env.NODE_DEBUG || '';
+  set = set.toUpperCase();
+  if (!debugs[set]) {
+    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+      var pid = process.pid;
+      debugs[set] = function() {
+        var msg = exports.format.apply(exports, arguments);
+        console.error('%s %d: %s', set, pid, msg);
+      };
+    } else {
+      debugs[set] = function() {};
+    }
+  }
+  return debugs[set];
+};
+
+
+/**
+ * Echos the value of a value. Trys to print the value out
+ * in the best way possible given the different types.
+ *
+ * @param {Object} obj The object to print out.
+ * @param {Object} opts Optional options object that alters the output.
+ */
+/* legacy: obj, showHidden, depth, colors*/
+function inspect(obj, opts) {
+  // default options
+  var ctx = {
+    seen: [],
+    stylize: stylizeNoColor
+  };
+  // legacy...
+  if (arguments.length >= 3) ctx.depth = arguments[2];
+  if (arguments.length >= 4) ctx.colors = arguments[3];
+  if (isBoolean(opts)) {
+    // legacy...
+    ctx.showHidden = opts;
+  } else if (opts) {
+    // got an "options" object
+    exports._extend(ctx, opts);
+  }
+  // set default options
+  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+  if (isUndefined(ctx.depth)) ctx.depth = 2;
+  if (isUndefined(ctx.colors)) ctx.colors = false;
+  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+  if (ctx.colors) ctx.stylize = stylizeWithColor;
+  return formatValue(ctx, obj, ctx.depth);
+}
+exports.inspect = inspect;
+
+
+// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+inspect.colors = {
+  'bold' : [1, 22],
+  'italic' : [3, 23],
+  'underline' : [4, 24],
+  'inverse' : [7, 27],
+  'white' : [37, 39],
+  'grey' : [90, 39],
+  'black' : [30, 39],
+  'blue' : [34, 39],
+  'cyan' : [36, 39],
+  'green' : [32, 39],
+  'magenta' : [35, 39],
+  'red' : [31, 39],
+  'yellow' : [33, 39]
+};
+
+// Don't use 'blue' not visible on cmd.exe
+inspect.styles = {
+  'special': 'cyan',
+  'number': 'yellow',
+  'boolean': 'yellow',
+  'undefined': 'grey',
+  'null': 'bold',
+  'string': 'green',
+  'date': 'magenta',
+  // "name": intentionally not styling
+  'regexp': 'red'
+};
+
+
+function stylizeWithColor(str, styleType) {
+  var style = inspect.styles[styleType];
+
+  if (style) {
+    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+           '\u001b[' + inspect.colors[style][1] + 'm';
+  } else {
+    return str;
+  }
+}
+
+
+function stylizeNoColor(str, styleType) {
+  return str;
+}
+
+
+function arrayToHash(array) {
+  var hash = {};
+
+  array.forEach(function(val, idx) {
+    hash[val] = true;
+  });
+
+  return hash;
+}
+
+
+function formatValue(ctx, value, recurseTimes) {
+  // Provide a hook for user-specified inspect functions.
+  // Check that value is an object with an inspect function on it
+  if (ctx.customInspect &&
+      value &&
+      isFunction(value.inspect) &&
+      // Filter out the util module, it's inspect function is special
+      value.inspect !== exports.inspect &&
+      // Also filter out any prototype objects using the circular check.
+      !(value.constructor && value.constructor.prototype === value)) {
+    var ret = value.inspect(recurseTimes, ctx);
+    if (!isString(ret)) {
+      ret = formatValue(ctx, ret, recurseTimes);
+    }
+    return ret;
+  }
+
+  // Primitive types cannot have properties
+  var primitive = formatPrimitive(ctx, value);
+  if (primitive) {
+    return primitive;
+  }
+
+  // Look up the keys of the object.
+  var keys = Object.keys(value);
+  var visibleKeys = arrayToHash(keys);
+
+  if (ctx.showHidden) {
+    keys = Object.getOwnPropertyNames(value);
+  }
+
+  // IE doesn't make error fields non-enumerable
+  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+  if (isError(value)
+      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+    return formatError(value);
+  }
+
+  // Some type of object without properties can be shortcutted.
+  if (keys.length === 0) {
+    if (isFunction(value)) {
+      var name = value.name ? ': ' + value.name : '';
+      return ctx.stylize('[Function' + name + ']', 'special');
+    }
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    }
+    if (isDate(value)) {
+      return ctx.stylize(Date.prototype.toString.call(value), 'date');
+    }
+    if (isError(value)) {
+      return formatError(value);
+    }
+  }
+
+  var base = '', array = false, braces = ['{', '}'];
+
+  // Make Array say that they are Array
+  if (isArray(value)) {
+    array = true;
+    braces = ['[', ']'];
+  }
+
+  // Make functions say that they are functions
+  if (isFunction(value)) {
+    var n = value.name ? ': ' + value.name : '';
+    base = ' [Function' + n + ']';
+  }
+
+  // Make RegExps say that they are RegExps
+  if (isRegExp(value)) {
+    base = ' ' + RegExp.prototype.toString.call(value);
+  }
+
+  // Make dates with properties first say the date
+  if (isDate(value)) {
+    base = ' ' + Date.prototype.toUTCString.call(value);
+  }
+
+  // Make error with message first say the error
+  if (isError(value)) {
+    base = ' ' + formatError(value);
+  }
+
+  if (keys.length === 0 && (!array || value.length == 0)) {
+    return braces[0] + base + braces[1];
+  }
+
+  if (recurseTimes < 0) {
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    } else {
+      return ctx.stylize('[Object]', 'special');
+    }
+  }
+
+  ctx.seen.push(value);
+
+  var output;
+  if (array) {
+    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+  } else {
+    output = keys.map(function(key) {
+      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+    });
+  }
+
+  ctx.seen.pop();
+
+  return reduceToSingleString(output, base, braces);
+}
+
+
+function formatPrimitive(ctx, value) {
+  if (isUndefined(value))
+    return ctx.stylize('undefined', 'undefined');
+  if (isString(value)) {
+    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                             .replace(/'/g, "\\'")
+                                             .replace(/\\"/g, '"') + '\'';
+    return ctx.stylize(simple, 'string');
+  }
+  if (isNumber(value))
+    return ctx.stylize('' + value, 'number');
+  if (isBoolean(value))
+    return ctx.stylize('' + value, 'boolean');
+  // For some reason typeof null is "object", so special case here.
+  if (isNull(value))
+    return ctx.stylize('null', 'null');
+}
+
+
+function formatError(value) {
+  return '[' + Error.prototype.toString.call(value) + ']';
+}
+
+
+function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+  var output = [];
+  for (var i = 0, l = value.length; i < l; ++i) {
+    if (hasOwnProperty(value, String(i))) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          String(i), true));
+    } else {
+      output.push('');
+    }
+  }
+  keys.forEach(function(key) {
+    if (!key.match(/^\d+$/)) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          key, true));
+    }
+  });
+  return output;
+}
+
+
+function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+  var name, str, desc;
+  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+  if (desc.get) {
+    if (desc.set) {
+      str = ctx.stylize('[Getter/Setter]', 'special');
+    } else {
+      str = ctx.stylize('[Getter]', 'special');
+    }
+  } else {
+    if (desc.set) {
+      str = ctx.stylize('[Setter]', 'special');
+    }
+  }
+  if (!hasOwnProperty(visibleKeys, key)) {
+    name = '[' + key + ']';
+  }
+  if (!str) {
+    if (ctx.seen.indexOf(desc.value) < 0) {
+      if (isNull(recurseTimes)) {
+        str = formatValue(ctx, desc.value, null);
+      } else {
+        str = formatValue(ctx, desc.value, recurseTimes - 1);
+      }
+      if (str.indexOf('\n') > -1) {
+        if (array) {
+          str = str.split('\n').map(function(line) {
+            return '  ' + line;
+          }).join('\n').substr(2);
+        } else {
+          str = '\n' + str.split('\n').map(function(line) {
+            return '   ' + line;
+          }).join('\n');
+        }
+      }
+    } else {
+      str = ctx.stylize('[Circular]', 'special');
+    }
+  }
+  if (isUndefined(name)) {
+    if (array && key.match(/^\d+$/)) {
+      return str;
+    }
+    name = JSON.stringify('' + key);
+    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+      name = name.substr(1, name.length - 2);
+      name = ctx.stylize(name, 'name');
+    } else {
+      name = name.replace(/'/g, "\\'")
+                 .replace(/\\"/g, '"')
+                 .replace(/(^"|"$)/g, "'");
+      name = ctx.stylize(name, 'string');
+    }
+  }
+
+  return name + ': ' + str;
+}
+
+
+function reduceToSingleString(output, base, braces) {
+  var numLinesEst = 0;
+  var length = output.reduce(function(prev, cur) {
+    numLinesEst++;
+    if (cur.indexOf('\n') >= 0) numLinesEst++;
+    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+  }, 0);
+
+  if (length > 60) {
+    return braces[0] +
+           (base === '' ? '' : base + '\n ') +
+           ' ' +
+           output.join(',\n  ') +
+           ' ' +
+           braces[1];
+  }
+
+  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+}
+
+
+// NOTE: These type checking functions intentionally don't use `instanceof`
+// because it is fragile and can be easily faked with `Object.create()`.
+function isArray(ar) {
+  return Array.isArray(ar);
+}
+exports.isArray = isArray;
+
+function isBoolean(arg) {
+  return typeof arg === 'boolean';
+}
+exports.isBoolean = isBoolean;
+
+function isNull(arg) {
+  return arg === null;
+}
+exports.isNull = isNull;
+
+function isNullOrUndefined(arg) {
+  return arg == null;
+}
+exports.isNullOrUndefined = isNullOrUndefined;
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+exports.isNumber = isNumber;
+
+function isString(arg) {
+  return typeof arg === 'string';
+}
+exports.isString = isString;
+
+function isSymbol(arg) {
+  return typeof arg === 'symbol';
+}
+exports.isSymbol = isSymbol;
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+exports.isUndefined = isUndefined;
+
+function isRegExp(re) {
+  return isObject(re) && objectToString(re) === '[object RegExp]';
+}
+exports.isRegExp = isRegExp;
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+exports.isObject = isObject;
+
+function isDate(d) {
+  return isObject(d) && objectToString(d) === '[object Date]';
+}
+exports.isDate = isDate;
+
+function isError(e) {
+  return isObject(e) &&
+      (objectToString(e) === '[object Error]' || e instanceof Error);
+}
+exports.isError = isError;
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+exports.isFunction = isFunction;
+
+function isPrimitive(arg) {
+  return arg === null ||
+         typeof arg === 'boolean' ||
+         typeof arg === 'number' ||
+         typeof arg === 'string' ||
+         typeof arg === 'symbol' ||  // ES6 symbol
+         typeof arg === 'undefined';
+}
+exports.isPrimitive = isPrimitive;
+
+exports.isBuffer = __webpack_require__(/*! ./support/isBuffer */ "./node_modules/util/support/isBufferBrowser.js");
+
+function objectToString(o) {
+  return Object.prototype.toString.call(o);
+}
+
+
+function pad(n) {
+  return n < 10 ? '0' + n.toString(10) : n.toString(10);
+}
+
+
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+              'Oct', 'Nov', 'Dec'];
+
+// 26 Feb 16:19:34
+function timestamp() {
+  var d = new Date();
+  var time = [pad(d.getHours()),
+              pad(d.getMinutes()),
+              pad(d.getSeconds())].join(':');
+  return [d.getDate(), months[d.getMonth()], time].join(' ');
+}
+
+
+// log is just a thin wrapper to console.log that prepends a timestamp
+exports.log = function() {
+  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+};
+
+
+/**
+ * Inherit the prototype methods from one constructor into another.
+ *
+ * The Function.prototype.inherits from lang.js rewritten as a standalone
+ * function (not on Function.prototype). NOTE: If this file is to be loaded
+ * during bootstrapping this function needs to be rewritten using some native
+ * functions as prototype setup using normal JavaScript does not work as
+ * expected during bootstrapping (see mirror.js in r114903).
+ *
+ * @param {function} ctor Constructor function which needs to inherit the
+ *     prototype.
+ * @param {function} superCtor Constructor function to inherit prototype from.
+ */
+exports.inherits = __webpack_require__(/*! inherits */ "./node_modules/util/node_modules/inherits/inherits_browser.js");
+
+exports._extend = function(origin, add) {
+  // Don't do anything if add isn't an object
+  if (!add || !isObject(add)) return origin;
+
+  var keys = Object.keys(add);
+  var i = keys.length;
+  while (i--) {
+    origin[keys[i]] = add[keys[i]];
+  }
+  return origin;
+};
+
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+var kCustomPromisifiedSymbol = typeof Symbol !== 'undefined' ? Symbol('util.promisify.custom') : undefined;
+
+exports.promisify = function promisify(original) {
+  if (typeof original !== 'function')
+    throw new TypeError('The "original" argument must be of type Function');
+
+  if (kCustomPromisifiedSymbol && original[kCustomPromisifiedSymbol]) {
+    var fn = original[kCustomPromisifiedSymbol];
+    if (typeof fn !== 'function') {
+      throw new TypeError('The "util.promisify.custom" argument must be of type Function');
+    }
+    Object.defineProperty(fn, kCustomPromisifiedSymbol, {
+      value: fn, enumerable: false, writable: false, configurable: true
+    });
+    return fn;
+  }
+
+  function fn() {
+    var promiseResolve, promiseReject;
+    var promise = new Promise(function (resolve, reject) {
+      promiseResolve = resolve;
+      promiseReject = reject;
+    });
+
+    var args = [];
+    for (var i = 0; i < arguments.length; i++) {
+      args.push(arguments[i]);
+    }
+    args.push(function (err, value) {
+      if (err) {
+        promiseReject(err);
+      } else {
+        promiseResolve(value);
+      }
+    });
+
+    try {
+      original.apply(this, args);
+    } catch (err) {
+      promiseReject(err);
+    }
+
+    return promise;
+  }
+
+  Object.setPrototypeOf(fn, Object.getPrototypeOf(original));
+
+  if (kCustomPromisifiedSymbol) Object.defineProperty(fn, kCustomPromisifiedSymbol, {
+    value: fn, enumerable: false, writable: false, configurable: true
+  });
+  return Object.defineProperties(
+    fn,
+    getOwnPropertyDescriptors(original)
+  );
+}
+
+exports.promisify.custom = kCustomPromisifiedSymbol
+
+function callbackifyOnRejected(reason, cb) {
+  // `!reason` guard inspired by bluebird (Ref: https://goo.gl/t5IS6M).
+  // Because `null` is a special error value in callbacks which means "no error
+  // occurred", we error-wrap so the callback consumer can distinguish between
+  // "the promise rejected with null" or "the promise fulfilled with undefined".
+  if (!reason) {
+    var newReason = new Error('Promise was rejected with a falsy value');
+    newReason.reason = reason;
+    reason = newReason;
+  }
+  return cb(reason);
+}
+
+function callbackify(original) {
+  if (typeof original !== 'function') {
+    throw new TypeError('The "original" argument must be of type Function');
+  }
+
+  // We DO NOT return the promise as it gives the user a false sense that
+  // the promise is actually somehow related to the callback's execution
+  // and that the callback throwing will reject the promise.
+  function callbackified() {
+    var args = [];
+    for (var i = 0; i < arguments.length; i++) {
+      args.push(arguments[i]);
+    }
+
+    var maybeCb = args.pop();
+    if (typeof maybeCb !== 'function') {
+      throw new TypeError('The last argument must be of type Function');
+    }
+    var self = this;
+    var cb = function() {
+      return maybeCb.apply(self, arguments);
+    };
+    // In true node style we process the callback on `nextTick` with all the
+    // implications (stack, `uncaughtException`, `async_hooks`)
+    original.apply(this, args)
+      .then(function(ret) { process.nextTick(cb, null, ret) },
+            function(rej) { process.nextTick(callbackifyOnRejected, rej, cb) });
+  }
+
+  Object.setPrototypeOf(callbackified, Object.getPrototypeOf(original));
+  Object.defineProperties(callbackified,
+                          getOwnPropertyDescriptors(original));
+  return callbackified;
+}
+exports.callbackify = callbackify;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../process/browser.js */ "./node_modules/process/browser.js")))
+
+/***/ }),
+
 /***/ "./node_modules/value-equal/esm/value-equal.js":
 /*!*****************************************************!*\
   !*** ./node_modules/value-equal/esm/value-equal.js ***!
@@ -30558,6 +31716,1168 @@ module.exports = function(originalModule) {
 	}
 	return module;
 };
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/BasicEvaluatedExpression.js":
+/*!*************************************************!*\
+  !*** (webpack)/lib/BasicEvaluatedExpression.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+
+
+const TypeUnknown = 0;
+const TypeNull = 1;
+const TypeString = 2;
+const TypeNumber = 3;
+const TypeBoolean = 4;
+const TypeRegExp = 5;
+const TypeConditional = 6;
+const TypeArray = 7;
+const TypeConstArray = 8;
+const TypeIdentifier = 9;
+const TypeWrapped = 10;
+const TypeTemplateString = 11;
+
+class BasicEvaluatedExpression {
+	constructor() {
+		this.type = TypeUnknown;
+		this.range = null;
+		this.falsy = false;
+		this.truthy = false;
+		this.bool = null;
+		this.number = null;
+		this.regExp = null;
+		this.string = null;
+		this.quasis = null;
+		this.parts = null;
+		this.array = null;
+		this.items = null;
+		this.options = null;
+		this.prefix = null;
+		this.postfix = null;
+		this.wrappedInnerExpressions = null;
+		this.expression = null;
+	}
+
+	isNull() {
+		return this.type === TypeNull;
+	}
+
+	isString() {
+		return this.type === TypeString;
+	}
+
+	isNumber() {
+		return this.type === TypeNumber;
+	}
+
+	isBoolean() {
+		return this.type === TypeBoolean;
+	}
+
+	isRegExp() {
+		return this.type === TypeRegExp;
+	}
+
+	isConditional() {
+		return this.type === TypeConditional;
+	}
+
+	isArray() {
+		return this.type === TypeArray;
+	}
+
+	isConstArray() {
+		return this.type === TypeConstArray;
+	}
+
+	isIdentifier() {
+		return this.type === TypeIdentifier;
+	}
+
+	isWrapped() {
+		return this.type === TypeWrapped;
+	}
+
+	isTemplateString() {
+		return this.type === TypeTemplateString;
+	}
+
+	isTruthy() {
+		return this.truthy;
+	}
+
+	isFalsy() {
+		return this.falsy;
+	}
+
+	asBool() {
+		if (this.truthy) return true;
+		if (this.falsy) return false;
+		if (this.isBoolean()) return this.bool;
+		if (this.isNull()) return false;
+		if (this.isString()) return this.string !== "";
+		if (this.isNumber()) return this.number !== 0;
+		if (this.isRegExp()) return true;
+		if (this.isArray()) return true;
+		if (this.isConstArray()) return true;
+		if (this.isWrapped()) {
+			return (this.prefix && this.prefix.asBool()) ||
+				(this.postfix && this.postfix.asBool())
+				? true
+				: undefined;
+		}
+		if (this.isTemplateString()) {
+			const str = this.asString();
+			if (typeof str === "string") return str !== "";
+		}
+		return undefined;
+	}
+
+	asString() {
+		if (this.isBoolean()) return `${this.bool}`;
+		if (this.isNull()) return "null";
+		if (this.isString()) return this.string;
+		if (this.isNumber()) return `${this.number}`;
+		if (this.isRegExp()) return `${this.regExp}`;
+		if (this.isArray()) {
+			let array = [];
+			for (const item of this.items) {
+				const itemStr = item.asString();
+				if (itemStr === undefined) return undefined;
+				array.push(itemStr);
+			}
+			return `${array}`;
+		}
+		if (this.isConstArray()) return `${this.array}`;
+		if (this.isTemplateString()) {
+			let str = "";
+			for (const part of this.parts) {
+				const partStr = part.asString();
+				if (partStr === undefined) return undefined;
+				str += partStr;
+			}
+			return str;
+		}
+		return undefined;
+	}
+
+	setString(string) {
+		this.type = TypeString;
+		this.string = string;
+		return this;
+	}
+
+	setNull() {
+		this.type = TypeNull;
+		return this;
+	}
+
+	setNumber(number) {
+		this.type = TypeNumber;
+		this.number = number;
+		return this;
+	}
+
+	setBoolean(bool) {
+		this.type = TypeBoolean;
+		this.bool = bool;
+		return this;
+	}
+
+	setRegExp(regExp) {
+		this.type = TypeRegExp;
+		this.regExp = regExp;
+		return this;
+	}
+
+	setIdentifier(identifier) {
+		this.type = TypeIdentifier;
+		this.identifier = identifier;
+		return this;
+	}
+
+	setWrapped(prefix, postfix, innerExpressions) {
+		this.type = TypeWrapped;
+		this.prefix = prefix;
+		this.postfix = postfix;
+		this.wrappedInnerExpressions = innerExpressions;
+		return this;
+	}
+
+	setOptions(options) {
+		this.type = TypeConditional;
+		this.options = options;
+		return this;
+	}
+
+	addOptions(options) {
+		if (!this.options) {
+			this.type = TypeConditional;
+			this.options = [];
+		}
+		for (const item of options) {
+			this.options.push(item);
+		}
+		return this;
+	}
+
+	setItems(items) {
+		this.type = TypeArray;
+		this.items = items;
+		return this;
+	}
+
+	setArray(array) {
+		this.type = TypeConstArray;
+		this.array = array;
+		return this;
+	}
+
+	setTemplateString(quasis, parts, kind) {
+		this.type = TypeTemplateString;
+		this.quasis = quasis;
+		this.parts = parts;
+		this.templateStringKind = kind;
+		return this;
+	}
+
+	setTruthy() {
+		this.falsy = false;
+		this.truthy = true;
+		return this;
+	}
+
+	setFalsy() {
+		this.falsy = true;
+		this.truthy = false;
+		return this;
+	}
+
+	setRange(range) {
+		this.range = range;
+		return this;
+	}
+
+	setExpression(expression) {
+		this.expression = expression;
+		return this;
+	}
+}
+
+module.exports = BasicEvaluatedExpression;
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/ConstPlugin.js":
+/*!************************************!*\
+  !*** (webpack)/lib/ConstPlugin.js ***!
+  \************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+const ConstDependency = __webpack_require__(/*! ./dependencies/ConstDependency */ "./node_modules/webpack/lib/dependencies/ConstDependency.js");
+const NullFactory = __webpack_require__(/*! ./NullFactory */ "./node_modules/webpack/lib/NullFactory.js");
+const ParserHelpers = __webpack_require__(/*! ./ParserHelpers */ "./node_modules/webpack/lib/ParserHelpers.js");
+
+const getQuery = request => {
+	const i = request.indexOf("?");
+	return i !== -1 ? request.substr(i) : "";
+};
+
+const collectDeclaration = (declarations, pattern) => {
+	const stack = [pattern];
+	while (stack.length > 0) {
+		const node = stack.pop();
+		switch (node.type) {
+			case "Identifier":
+				declarations.add(node.name);
+				break;
+			case "ArrayPattern":
+				for (const element of node.elements) {
+					if (element) {
+						stack.push(element);
+					}
+				}
+				break;
+			case "AssignmentPattern":
+				stack.push(node.left);
+				break;
+			case "ObjectPattern":
+				for (const property of node.properties) {
+					stack.push(property.value);
+				}
+				break;
+			case "RestElement":
+				stack.push(node.argument);
+				break;
+		}
+	}
+};
+
+const getHoistedDeclarations = (branch, includeFunctionDeclarations) => {
+	const declarations = new Set();
+	const stack = [branch];
+	while (stack.length > 0) {
+		const node = stack.pop();
+		// Some node could be `null` or `undefined`.
+		if (!node) continue;
+		switch (node.type) {
+			// Walk through control statements to look for hoisted declarations.
+			// Some branches are skipped since they do not allow declarations.
+			case "BlockStatement":
+				for (const stmt of node.body) {
+					stack.push(stmt);
+				}
+				break;
+			case "IfStatement":
+				stack.push(node.consequent);
+				stack.push(node.alternate);
+				break;
+			case "ForStatement":
+				stack.push(node.init);
+				stack.push(node.body);
+				break;
+			case "ForInStatement":
+			case "ForOfStatement":
+				stack.push(node.left);
+				stack.push(node.body);
+				break;
+			case "DoWhileStatement":
+			case "WhileStatement":
+			case "LabeledStatement":
+				stack.push(node.body);
+				break;
+			case "SwitchStatement":
+				for (const cs of node.cases) {
+					for (const consequent of cs.consequent) {
+						stack.push(consequent);
+					}
+				}
+				break;
+			case "TryStatement":
+				stack.push(node.block);
+				if (node.handler) {
+					stack.push(node.handler.body);
+				}
+				stack.push(node.finalizer);
+				break;
+			case "FunctionDeclaration":
+				if (includeFunctionDeclarations) {
+					collectDeclaration(declarations, node.id);
+				}
+				break;
+			case "VariableDeclaration":
+				if (node.kind === "var") {
+					for (const decl of node.declarations) {
+						collectDeclaration(declarations, decl.id);
+					}
+				}
+				break;
+		}
+	}
+	return Array.from(declarations);
+};
+
+class ConstPlugin {
+	apply(compiler) {
+		compiler.hooks.compilation.tap(
+			"ConstPlugin",
+			(compilation, { normalModuleFactory }) => {
+				compilation.dependencyFactories.set(ConstDependency, new NullFactory());
+				compilation.dependencyTemplates.set(
+					ConstDependency,
+					new ConstDependency.Template()
+				);
+
+				const handler = parser => {
+					parser.hooks.statementIf.tap("ConstPlugin", statement => {
+						if (parser.scope.isAsmJs) return;
+						const param = parser.evaluateExpression(statement.test);
+						const bool = param.asBool();
+						if (typeof bool === "boolean") {
+							if (statement.test.type !== "Literal") {
+								const dep = new ConstDependency(`${bool}`, param.range);
+								dep.loc = statement.loc;
+								parser.state.current.addDependency(dep);
+							}
+							const branchToRemove = bool
+								? statement.alternate
+								: statement.consequent;
+							if (branchToRemove) {
+								// Before removing the dead branch, the hoisted declarations
+								// must be collected.
+								//
+								// Given the following code:
+								//
+								//     if (true) f() else g()
+								//     if (false) {
+								//       function f() {}
+								//       const g = function g() {}
+								//       if (someTest) {
+								//         let a = 1
+								//         var x, {y, z} = obj
+								//       }
+								//     } else {
+								//       …
+								//     }
+								//
+								// the generated code is:
+								//
+								//     if (true) f() else {}
+								//     if (false) {
+								//       var f, x, y, z;   (in loose mode)
+								//       var x, y, z;      (in strict mode)
+								//     } else {
+								//       …
+								//     }
+								//
+								// NOTE: When code runs in strict mode, `var` declarations
+								// are hoisted but `function` declarations don't.
+								//
+								let declarations;
+								if (parser.scope.isStrict) {
+									// If the code runs in strict mode, variable declarations
+									// using `var` must be hoisted.
+									declarations = getHoistedDeclarations(branchToRemove, false);
+								} else {
+									// Otherwise, collect all hoisted declaration.
+									declarations = getHoistedDeclarations(branchToRemove, true);
+								}
+								let replacement;
+								if (declarations.length > 0) {
+									replacement = `{ var ${declarations.join(", ")}; }`;
+								} else {
+									replacement = "{}";
+								}
+								const dep = new ConstDependency(
+									replacement,
+									branchToRemove.range
+								);
+								dep.loc = branchToRemove.loc;
+								parser.state.current.addDependency(dep);
+							}
+							return bool;
+						}
+					});
+					parser.hooks.expressionConditionalOperator.tap(
+						"ConstPlugin",
+						expression => {
+							if (parser.scope.isAsmJs) return;
+							const param = parser.evaluateExpression(expression.test);
+							const bool = param.asBool();
+							if (typeof bool === "boolean") {
+								if (expression.test.type !== "Literal") {
+									const dep = new ConstDependency(` ${bool}`, param.range);
+									dep.loc = expression.loc;
+									parser.state.current.addDependency(dep);
+								}
+								// Expressions do not hoist.
+								// It is safe to remove the dead branch.
+								//
+								// Given the following code:
+								//
+								//   false ? someExpression() : otherExpression();
+								//
+								// the generated code is:
+								//
+								//   false ? undefined : otherExpression();
+								//
+								const branchToRemove = bool
+									? expression.alternate
+									: expression.consequent;
+								const dep = new ConstDependency(
+									"undefined",
+									branchToRemove.range
+								);
+								dep.loc = branchToRemove.loc;
+								parser.state.current.addDependency(dep);
+								return bool;
+							}
+						}
+					);
+					parser.hooks.expressionLogicalOperator.tap(
+						"ConstPlugin",
+						expression => {
+							if (parser.scope.isAsmJs) return;
+							if (
+								expression.operator === "&&" ||
+								expression.operator === "||"
+							) {
+								const param = parser.evaluateExpression(expression.left);
+								const bool = param.asBool();
+								if (typeof bool === "boolean") {
+									// Expressions do not hoist.
+									// It is safe to remove the dead branch.
+									//
+									// ------------------------------------------
+									//
+									// Given the following code:
+									//
+									//   falsyExpression() && someExpression();
+									//
+									// the generated code is:
+									//
+									//   falsyExpression() && false;
+									//
+									// ------------------------------------------
+									//
+									// Given the following code:
+									//
+									//   truthyExpression() && someExpression();
+									//
+									// the generated code is:
+									//
+									//   true && someExpression();
+									//
+									// ------------------------------------------
+									//
+									// Given the following code:
+									//
+									//   truthyExpression() || someExpression();
+									//
+									// the generated code is:
+									//
+									//   truthyExpression() || false;
+									//
+									// ------------------------------------------
+									//
+									// Given the following code:
+									//
+									//   falsyExpression() || someExpression();
+									//
+									// the generated code is:
+									//
+									//   false && someExpression();
+									//
+									const keepRight =
+										(expression.operator === "&&" && bool) ||
+										(expression.operator === "||" && !bool);
+
+									if (param.isBoolean() || keepRight) {
+										// for case like
+										//
+										//   return'development'===process.env.NODE_ENV&&'foo'
+										//
+										// we need a space before the bool to prevent result like
+										//
+										//   returnfalse&&'foo'
+										//
+										const dep = new ConstDependency(` ${bool}`, param.range);
+										dep.loc = expression.loc;
+										parser.state.current.addDependency(dep);
+									} else {
+										parser.walkExpression(expression.left);
+									}
+									if (!keepRight) {
+										const dep = new ConstDependency(
+											"false",
+											expression.right.range
+										);
+										dep.loc = expression.loc;
+										parser.state.current.addDependency(dep);
+									}
+									return keepRight;
+								}
+							}
+						}
+					);
+					parser.hooks.evaluateIdentifier
+						.for("__resourceQuery")
+						.tap("ConstPlugin", expr => {
+							if (parser.scope.isAsmJs) return;
+							if (!parser.state.module) return;
+							return ParserHelpers.evaluateToString(
+								getQuery(parser.state.module.resource)
+							)(expr);
+						});
+					parser.hooks.expression
+						.for("__resourceQuery")
+						.tap("ConstPlugin", () => {
+							if (parser.scope.isAsmJs) return;
+							if (!parser.state.module) return;
+							parser.state.current.addVariable(
+								"__resourceQuery",
+								JSON.stringify(getQuery(parser.state.module.resource))
+							);
+							return true;
+						});
+				};
+
+				normalModuleFactory.hooks.parser
+					.for("javascript/auto")
+					.tap("ConstPlugin", handler);
+				normalModuleFactory.hooks.parser
+					.for("javascript/dynamic")
+					.tap("ConstPlugin", handler);
+				normalModuleFactory.hooks.parser
+					.for("javascript/esm")
+					.tap("ConstPlugin", handler);
+			}
+		);
+	}
+}
+
+module.exports = ConstPlugin;
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/Dependency.js":
+/*!***********************************!*\
+  !*** (webpack)/lib/Dependency.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+
+const util = __webpack_require__(/*! util */ "./node_modules/util/util.js");
+const compareLocations = __webpack_require__(/*! ./compareLocations */ "./node_modules/webpack/lib/compareLocations.js");
+const DependencyReference = __webpack_require__(/*! ./dependencies/DependencyReference */ "./node_modules/webpack/lib/dependencies/DependencyReference.js");
+
+/** @typedef {import("./Module")} Module */
+/** @typedef {import("webpack-sources").Source} Source */
+/** @typedef {import("./RuntimeTemplate")} RuntimeTemplate */
+
+/**
+ * @typedef {Object} DependencyTemplate
+ * @property {function(Dependency, Source, RuntimeTemplate, Map<Function, DependencyTemplate>): void} apply
+ */
+
+/** @typedef {Object} SourcePosition
+ *  @property {number} line
+ *  @property {number=} column
+ */
+
+/** @typedef {Object} RealDependencyLocation
+ *  @property {SourcePosition} start
+ *  @property {SourcePosition=} end
+ *  @property {number=} index
+ */
+
+/** @typedef {Object} SynteticDependencyLocation
+ *  @property {string} name
+ *  @property {number=} index
+ */
+
+/** @typedef {SynteticDependencyLocation|RealDependencyLocation} DependencyLocation */
+
+class Dependency {
+	constructor() {
+		/** @type {Module|null} */
+		this.module = null;
+		// TODO remove in webpack 5
+		/** @type {boolean} */
+		this.weak = false;
+		/** @type {boolean} */
+		this.optional = false;
+		/** @type {DependencyLocation} */
+		this.loc = undefined;
+	}
+
+	getResourceIdentifier() {
+		return null;
+	}
+
+	// Returns the referenced module and export
+	getReference() {
+		if (!this.module) return null;
+		return new DependencyReference(this.module, true, this.weak);
+	}
+
+	// Returns the exported names
+	getExports() {
+		return null;
+	}
+
+	getWarnings() {
+		return null;
+	}
+
+	getErrors() {
+		return null;
+	}
+
+	updateHash(hash) {
+		hash.update((this.module && this.module.id) + "");
+	}
+
+	disconnect() {
+		this.module = null;
+	}
+}
+
+// TODO remove in webpack 5
+Dependency.compare = util.deprecate(
+	(a, b) => compareLocations(a.loc, b.loc),
+	"Dependency.compare is deprecated and will be removed in the next major version"
+);
+
+module.exports = Dependency;
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/NullFactory.js":
+/*!************************************!*\
+  !*** (webpack)/lib/NullFactory.js ***!
+  \************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+
+class NullFactory {
+	create(data, callback) {
+		return callback();
+	}
+}
+module.exports = NullFactory;
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/ParserHelpers.js":
+/*!**************************************!*\
+  !*** (webpack)/lib/ParserHelpers.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+const path = __webpack_require__(/*! path */ "./node_modules/path-browserify/index.js");
+
+const BasicEvaluatedExpression = __webpack_require__(/*! ./BasicEvaluatedExpression */ "./node_modules/webpack/lib/BasicEvaluatedExpression.js");
+const ConstDependency = __webpack_require__(/*! ./dependencies/ConstDependency */ "./node_modules/webpack/lib/dependencies/ConstDependency.js");
+const UnsupportedFeatureWarning = __webpack_require__(/*! ./UnsupportedFeatureWarning */ "./node_modules/webpack/lib/UnsupportedFeatureWarning.js");
+
+const ParserHelpers = exports;
+
+ParserHelpers.addParsedVariableToModule = (parser, name, expression) => {
+	if (!parser.state.current.addVariable) return false;
+	var deps = [];
+	parser.parse(expression, {
+		current: {
+			addDependency: dep => {
+				dep.userRequest = name;
+				deps.push(dep);
+			}
+		},
+		module: parser.state.module
+	});
+	parser.state.current.addVariable(name, expression, deps);
+	return true;
+};
+
+ParserHelpers.requireFileAsExpression = (context, pathToModule) => {
+	var moduleJsPath = path.relative(context, pathToModule);
+	if (!/^[A-Z]:/i.test(moduleJsPath)) {
+		moduleJsPath = "./" + moduleJsPath.replace(/\\/g, "/");
+	}
+	return "require(" + JSON.stringify(moduleJsPath) + ")";
+};
+
+ParserHelpers.toConstantDependency = (parser, value) => {
+	return function constDependency(expr) {
+		var dep = new ConstDependency(value, expr.range, false);
+		dep.loc = expr.loc;
+		parser.state.current.addDependency(dep);
+		return true;
+	};
+};
+
+ParserHelpers.toConstantDependencyWithWebpackRequire = (parser, value) => {
+	return function constDependencyWithWebpackRequire(expr) {
+		var dep = new ConstDependency(value, expr.range, true);
+		dep.loc = expr.loc;
+		parser.state.current.addDependency(dep);
+		return true;
+	};
+};
+
+ParserHelpers.evaluateToString = value => {
+	return function stringExpression(expr) {
+		return new BasicEvaluatedExpression().setString(value).setRange(expr.range);
+	};
+};
+
+ParserHelpers.evaluateToBoolean = value => {
+	return function booleanExpression(expr) {
+		return new BasicEvaluatedExpression()
+			.setBoolean(value)
+			.setRange(expr.range);
+	};
+};
+
+ParserHelpers.evaluateToIdentifier = (identifier, truthy) => {
+	return function identifierExpression(expr) {
+		let evex = new BasicEvaluatedExpression()
+			.setIdentifier(identifier)
+			.setRange(expr.range);
+		if (truthy === true) {
+			evex = evex.setTruthy();
+		} else if (truthy === false) {
+			evex = evex.setFalsy();
+		}
+		return evex;
+	};
+};
+
+ParserHelpers.expressionIsUnsupported = (parser, message) => {
+	return function unsupportedExpression(expr) {
+		var dep = new ConstDependency("(void 0)", expr.range, false);
+		dep.loc = expr.loc;
+		parser.state.current.addDependency(dep);
+		if (!parser.state.module) return;
+		parser.state.module.warnings.push(
+			new UnsupportedFeatureWarning(parser.state.module, message, expr.loc)
+		);
+		return true;
+	};
+};
+
+ParserHelpers.skipTraversal = function skipTraversal() {
+	return true;
+};
+
+ParserHelpers.approve = function approve() {
+	return true;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/UnsupportedFeatureWarning.js":
+/*!**************************************************!*\
+  !*** (webpack)/lib/UnsupportedFeatureWarning.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+
+const WebpackError = __webpack_require__(/*! ./WebpackError */ "./node_modules/webpack/lib/WebpackError.js");
+
+/** @typedef {import("./Module")} Module */
+/** @typedef {import("./Dependency").DependencyLocation} DependencyLocation */
+
+class UnsupportedFeatureWarning extends WebpackError {
+	/**
+	 * @param {Module} module module relevant to warning
+	 * @param {string} message description of warning
+	 * @param {DependencyLocation} loc location start and end positions of the module
+	 */
+	constructor(module, message, loc) {
+		super(message);
+
+		this.name = "UnsupportedFeatureWarning";
+		this.module = module;
+		this.loc = loc;
+		this.hideStack = true;
+
+		Error.captureStackTrace(this, this.constructor);
+	}
+}
+
+module.exports = UnsupportedFeatureWarning;
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/WebpackError.js":
+/*!*************************************!*\
+  !*** (webpack)/lib/WebpackError.js ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Jarid Margolin @jaridmargolin
+*/
+
+
+const inspect = __webpack_require__(/*! util */ "./node_modules/util/util.js").inspect.custom;
+
+class WebpackError extends Error {
+	/**
+	 * Creates an instance of WebpackError.
+	 * @param {string=} message error message
+	 */
+	constructor(message) {
+		super(message);
+
+		this.details = undefined;
+		this.missing = undefined;
+		this.origin = undefined;
+		this.dependencies = undefined;
+		this.module = undefined;
+
+		Error.captureStackTrace(this, this.constructor);
+	}
+
+	[inspect]() {
+		return this.stack + (this.details ? `\n${this.details}` : "");
+	}
+}
+
+module.exports = WebpackError;
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/compareLocations.js":
+/*!*****************************************!*\
+  !*** (webpack)/lib/compareLocations.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+
+/** @typedef {import("./Dependency").DependencyLocation} DependencyLocation */
+
+// TODO webpack 5 remove string type from a and b
+/**
+ * Compare two locations
+ * @param {string|DependencyLocation} a A location node
+ * @param {string|DependencyLocation} b A location node
+ * @returns {-1|0|1} sorting comparator value
+ */
+module.exports = (a, b) => {
+	if (typeof a === "string") {
+		if (typeof b === "string") {
+			if (a < b) return -1;
+			if (a > b) return 1;
+			return 0;
+		} else if (typeof b === "object") {
+			return 1;
+		} else {
+			return 0;
+		}
+	} else if (typeof a === "object") {
+		if (typeof b === "string") {
+			return -1;
+		} else if (typeof b === "object") {
+			if ("start" in a && "start" in b) {
+				const ap = a.start;
+				const bp = b.start;
+				if (ap.line < bp.line) return -1;
+				if (ap.line > bp.line) return 1;
+				if (ap.column < bp.column) return -1;
+				if (ap.column > bp.column) return 1;
+			}
+			if ("name" in a && "name" in b) {
+				if (a.name < b.name) return -1;
+				if (a.name > b.name) return 1;
+			}
+			if ("index" in a && "index" in b) {
+				if (a.index < b.index) return -1;
+				if (a.index > b.index) return 1;
+			}
+			return 0;
+		} else {
+			return 0;
+		}
+	}
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/dependencies/ConstDependency.js":
+/*!*****************************************************!*\
+  !*** (webpack)/lib/dependencies/ConstDependency.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+const NullDependency = __webpack_require__(/*! ./NullDependency */ "./node_modules/webpack/lib/dependencies/NullDependency.js");
+
+class ConstDependency extends NullDependency {
+	constructor(expression, range, requireWebpackRequire) {
+		super();
+		this.expression = expression;
+		this.range = range;
+		this.requireWebpackRequire = requireWebpackRequire;
+	}
+
+	updateHash(hash) {
+		hash.update(this.range + "");
+		hash.update(this.expression + "");
+	}
+}
+
+ConstDependency.Template = class ConstDependencyTemplate {
+	apply(dep, source) {
+		if (typeof dep.range === "number") {
+			source.insert(dep.range, dep.expression);
+			return;
+		}
+
+		source.replace(dep.range[0], dep.range[1] - 1, dep.expression);
+	}
+};
+
+module.exports = ConstDependency;
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/dependencies/DependencyReference.js":
+/*!*********************************************************!*\
+  !*** (webpack)/lib/dependencies/DependencyReference.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Florent Cailhol @ooflorent
+*/
+
+
+/** @typedef {import("../Module")} Module */
+
+class DependencyReference {
+	// TODO webpack 5: module must be dynamic, you must pass a function returning a module
+	// This is needed to remove the hack in ConcatenatedModule
+	// The problem is that the `module` in Dependency could be replaced i. e. because of Scope Hoisting
+	/**
+	 *
+	 * @param {Module} module the referenced module
+	 * @param {string[] | boolean} importedNames imported named from the module
+	 * @param {boolean=} weak if this is a weak reference
+	 * @param {number} order the order information or NaN if don't care
+	 */
+	constructor(module, importedNames, weak = false, order = NaN) {
+		// TODO webpack 5: make it a getter
+		this.module = module;
+		// true: full object
+		// false: only sideeffects/no export
+		// array of strings: the exports with this names
+		this.importedNames = importedNames;
+		this.weak = !!weak;
+		this.order = order;
+	}
+
+	/**
+	 * @param {DependencyReference[]} array an array (will be modified)
+	 * @returns {DependencyReference[]} the array again
+	 */
+	static sort(array) {
+		/** @type {WeakMap<DependencyReference, number>} */
+		const originalOrder = new WeakMap();
+		let i = 0;
+		for (const ref of array) {
+			originalOrder.set(ref, i++);
+		}
+		return array.sort((a, b) => {
+			const aOrder = a.order;
+			const bOrder = b.order;
+			if (isNaN(aOrder)) {
+				if (!isNaN(bOrder)) {
+					return 1;
+				}
+			} else {
+				if (isNaN(bOrder)) {
+					return -1;
+				}
+				if (aOrder !== bOrder) {
+					return aOrder - bOrder;
+				}
+			}
+			const aOrg = originalOrder.get(a);
+			const bOrg = originalOrder.get(b);
+			return aOrg - bOrg;
+		});
+	}
+}
+
+module.exports = DependencyReference;
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/dependencies/NullDependency.js":
+/*!****************************************************!*\
+  !*** (webpack)/lib/dependencies/NullDependency.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+const Dependency = __webpack_require__(/*! ../Dependency */ "./node_modules/webpack/lib/Dependency.js");
+
+class NullDependency extends Dependency {
+	get type() {
+		return "null";
+	}
+
+	updateHash() {}
+}
+
+NullDependency.Template = class NullDependencyTemplate {
+	apply() {}
+};
+
+module.exports = NullDependency;
 
 
 /***/ })
